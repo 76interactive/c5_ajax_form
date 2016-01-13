@@ -1,8 +1,8 @@
 Concrete5 Ajax Form - Updated for Concrete5.7
 =============================================
 
-Improves the built-in form block so it submits via ajax. Also uses a table-less layout for easier styling.
-This repostiroy is a fork of [https://github.com/jordanlev/c5_ajax_form](https://github.com/jordanlev/c5_ajax_form)
+Improves the built-in form block so it submits via ajax. Also uses a table-less layout for easier styling.<br>
+This repository is a fork of [https://github.com/jordanlev/c5_ajax_form](https://github.com/jordanlev/c5_ajax_form)
 
 ### Installation
 * Download repository as .zip
