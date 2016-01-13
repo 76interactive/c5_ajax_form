@@ -1,153 +1,128 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
-$formAction = $this->action('submit_form').'#'.$qsID; //NOTE: This only works here (not in the controller)!
+  $formAction = $this->action('submit_form') . '#' . $qsID;
+  $ajax_url = REL_DIR_FILES_TOOLS_BLOCKS . '/form/responder';
 
-$isAjax = (empty($redirectCID) && !$hasFileUpload);
-if ($isAjax):
-	$ajax_url = REL_DIR_FILES_TOOLS_BLOCKS . '/form/ajax_responder';
-	$unencoded_form_action = str_replace('&amp;', '&', $formAction);
-	parse_str(parse_url($unencoded_form_action, PHP_URL_QUERY), $formActionQuerystring); //NOTE: $formActionQuerystring is uninitialized (this function is really weird about how it returns values!).
-	$ccm_token = $formActionQuerystring['ccm_token'];
-	$form_processing_varname = "processing_form_{$bID}";
-	$template_onsubmit_funcname = "form_{$bID}_onsubmit";
-	$template_onsuccess_funcname = "form_{$bID}_onsuccess";
-	$template_onerror_funcname = "form_{$bID}_onerror";
-	?>
-	<script type="text/javascript">
-	var <?php echo $form_processing_varname; ?> = false;
-	$(document).ready(function() {
-		$('#<?php echo $formDomId; ?>').ajaxForm({
-			'url': '<?php echo $ajax_url; ?>',
-			'dataType': 'json',
-			'data': {
-				'bID': <?php echo $bID; ?>,
-				'ccm_token': '<?php echo $ccm_token; ?>'
-			 },
-			'beforeSubmit': function() {
-				if (<?php echo $form_processing_varname; ?>) {
-					return false; //prevent re-submission while waiting for response
-				}
-				<?php echo $form_processing_varname; ?> = true;
-				<?php echo $template_onsubmit_funcname; ?>('#<?php echo $formDomId; ?>');
-			},
-			'success': function(response) {
-				<?php echo $form_processing_varname; ?> = false;
-				if (response.redirect.length) {
-					window.location.replace(response.redirect); //see http://stackoverflow.com/a/506004/477513
-				} else if (response.success) {
-					$('#<?php echo $formDomId; ?>').clearForm();
-					<?php echo $template_onsuccess_funcname; ?>('#<?php echo $formDomId; ?>', response.message);
-				} else {
-					<?php
-					/* CAPTCHA NOTES:
-					 * We must update the captcha image upon form validation error, because the server will have generated
-					 * a new image by now. Fortunately there is one Tools URL that always outputs the latest captcha image,
-					 * so all we need to do is reload that URL in the image's src. Note that we append a new timestamp
-					 * to that URL to prevent browser from showing a cached version of the old image (and that the timestamp
-					 * is generated in javascript, not php).
-					 */ ?>
-					var timestamp = Math.round(new Date().getTime() / 1000).toString();
-					$('#<?php echo $formDomId; ?> .ccm-captcha-image').attr('src', '<?php echo Loader::helper("concrete/urls")->getToolsURL("captcha"); ?>?nocache="' + timestamp);
-					$('#<?php echo $formDomId; ?> input[name="ccmCaptchaCode"]').val(''); //clear user's prior entry because it is now wrong
-					<?php echo $template_onerror_funcname; ?>('#<?php echo $formDomId; ?>', response.message, response.errors);
-				}
+  $form_processing_varname = "processing_form_{$bID}";
+  $template_onsubmit_funcname = "form_{$bID}_onsubmit";
+  $template_onsuccess_funcname = "form_{$bID}_onsuccess";
+  $template_onerror_funcname = "form_{$bID}_onerror";
+  
+?>
 
-			}
-		});
-	});
-	</script>
-	
-<?php /****************************************************************************************/ ?>
-	
-	<script type="text/javascript">
-		function <?php echo $template_onsubmit_funcname; ?>(form) {
-			//This js code happens when user submits the form...
-			$(form).find('div.errors').hide().html('');
-			$(form).find('input.submit').hide();
-			$(form).find('div.indicator').show();
-		}
-	
-		function <?php echo $template_onsuccess_funcname; ?>(form, thanks) {
-			//This js code happens after form is successfully processed...
-			$(form).find('div.success').html(thanks).show();
-			$(form).find('div.indicator').hide();
-			$(form).find('div.fields').hide();
-		}
-	
-		function <?php echo $template_onerror_funcname; ?>(form, errorHeader, errors) {
-			//This js code happens after form is rejected due to validation errors...
-			$(form).find('div.indicator').hide();
-			$(form).find('input.submit').show();
-		
-			var errorHtml = errorHeader;
-			errorHtml += '<ul>';
-			$.each(errors, function() {
-				errorHtml += '<li>' + this + '</li>';
-			});
-			errorHtml += '</ul>';
-			$(form).find('div.errors').html(errorHtml).show();
-		}
-	</script>
-<?php endif; ?>
+  <script type="text/javascript">
+    var <?php echo $form_processing_varname; ?> = false;
 
-<div id="formblock<?php echo $bID; ?>" class="formblock">
-<form id="<?php echo $formDomId; ?>" method="post" action="<?php echo $formAction; ?>" <?php echo ($hasFileUpload ? 'enctype="multipart/form-data"' : ''); ?>>
+    $(document).ready(function() {
+      $('#<?php echo $formDomId; ?>').on('submit', function(e) {
+        e.preventDefault();
 
-	<div class="success" <?php echo !$success ? 'style="display: none;"' : ''; ?>>
-		<?php echo $thanksMsg; ?>
-	</div>
-	
-	<div class="errors" <?php echo !$errors ? 'style="display: none;"' : ''; ?>>
-		<?php echo $errorHeader; ?>
-		<ul>
-			<?php foreach ($errors as $error): ?>
-			<li><?php echo $error; ?></li>
-			<?php endforeach; ?>
-		</ul>
-	</div>
+        var formFields = $('#<?php echo $formDomId; ?>').serializeArray();
+        var formData = {
+          'bID': <?php echo $bID; ?>
+        };
 
-	<div class="fields">
+        formFields.forEach(function(pair, index) {
+          formData[pair.name] = pair.value;
+        });
 
-		<?php foreach ($questions as $question): ?>
-			<div class="field field-<?php echo $question['type']; ?>">
-				<label <?php echo $question['labelFor']; ?> class="<?php echo $question['labelClasses']; ?>">
-					<?php echo $question['question']; ?>
-					<?php if ($question['required']): ?>
-						<span class="required">*</span>
-					<?php endif; ?>
-				</label>
+        if (<?php echo $form_processing_varname; ?>) {
+          return false; //prevent re-submission while waiting for response
+        }
+        <?php echo $form_processing_varname; ?> = true;
+        <?php echo $template_onsubmit_funcname; ?>('#<?php echo $formDomId; ?>');
 
-				<?php echo $question['input']; ?>
-			</div>
-		<?php endforeach; ?>
+        $.ajax({
+          'url': '<?php echo $ajax_url; ?>',
+          'dataType': 'json',
+          'data': formData,
+          'type': 'POST',
+          'success': function(response) {
+            <?php echo $form_processing_varname; ?> = false;
+            if (response.success) {
+              $('#<?php echo $formDomId; ?>').clearForm();
+              <?php echo $template_onsuccess_funcname; ?>('#<?php echo $formDomId; ?>', response.message);
+            } else {
+              <?php echo $template_onerror_funcname; ?>('#<?php echo $formDomId; ?>', response.message);
+            }
+          }
+        });
 
-		<?php if ($captcha): ?>
-			<div class="field field-captcha">
-				<label><?php echo t('Please type the letters and numbers shown in the image.'); ?></label>
-				<?php $captcha->display(); ?>
-				<?php $captcha->showInput(); ?>
-			</div>
-		<?php endif; ?>
-		
-		<?php if ($enableSpamHoneypot): ?>
-			<div class="field field-text visuallyhidden">
-				<label for="message"><?php echo t('Leave this field blank'); ?></label>
-				<input type="text" name="message1" />
-			</div>
-			<input type="hidden" name="message2" value="1" />
-		<?php endif; ?>
-		
-	</div><!-- .fields -->
+      });
+    });
+  </script>
+    
+  <script type="text/javascript">
+    function <?php echo $template_onsubmit_funcname; ?>(form) {
+      $(form).find('.errors').hide().html('');
+      $(form).find('input[type=submit]').hide();
+      $(form).find('.indicator').show();
+    }
 
-	<input type="submit" name="Submit" class="submit" value="Submit" />
+    function <?php echo $template_onsuccess_funcname; ?>(form, thanks) {
+      $(form).find('.success').html(thanks).show();
+      $(form).find('.indicator').hide();
+      $(form).find('.fields').hide();
+    }
 
-	<div class="indicator" style="display: none;">
-		<img src="<?php echo ASSETS_URL_IMAGES; ?>/throbber_white_16.gif" width="16" height="16" alt="" />
-		<span>Processing...</span>
-	</div>
+    function <?php echo $template_onerror_funcname; ?>(form, message) {
+      $(form).find('.indicator').hide();
+      $(form).find('input[type=submit]').show();
+      $(form).find('.errors').html(message).show();
+    }
+  </script>
 
-	<input name="qsID" type="hidden" value="<?php echo $qsID; ?>" />
-	<input name="pURI" type="hidden" value="<?php echo $pURI; ?>" />
+  <div id="formblock<?php echo $bID; ?>" class="formblock">
+  <form id="<?php echo $formDomId; ?>" method="post" action="<?php echo $formAction; ?>" <?php echo ($hasFileUpload ? 'enctype="multipart/form-data"' : ''); ?>>
 
-</form>
-</div><!-- .formblock -->
+    <div class="success" <?php echo !$success ? 'style="display: none;"' : ''; ?>>
+      <?php echo $thanksMsg; ?>
+    </div>
+    
+    <div class="errors" <?php echo !$errors ? 'style="display: none;"' : ''; ?>>
+      <?php echo $errorHeader; ?>
+      <ul>
+        <?php
+          if (isset($errors) && count($errors) > 0) {
+            foreach ($errors as $error) {
+        ?>
+        <li><?php echo $error; ?></li>
+        <?php
+            }
+          }
+        ?>
+      </ul>
+    </div>
+
+    <div class="fields">
+      <?php
+        if (isset($questions) && count($questions) > 0) {
+          foreach ($questions as $question) {
+      ?>
+        <div class="field field-<?php echo $question['type']; ?>">
+          <label <?php echo $question['labelFor']; ?> class="<?php echo $question['labelClasses']; ?>">
+            <?php echo $question['question']; ?>
+            <?php if ($question['required']): ?>
+              <span class="required">*</span>
+            <?php endif; ?>
+          </label>
+
+          <?php echo $question['input']; ?>
+        </div>
+      <?php
+          }
+        }
+      ?>
+    </div><!-- .fields -->
+
+    <input type="submit" name="Submit" class="submit" value="Submit" />
+
+    <div class="indicator" style="display: none;">
+      <img src="<?php echo ASSETS_URL_IMAGES; ?>/throbber_white_16.gif" width="16" height="16" alt="" />
+      <span>Processing...</span>
+    </div>
+
+    <input name="qsID" type="hidden" value="<?php echo $qsID; ?>" />
+    <input name="pURI" type="hidden" value="<?php echo $pURI; ?>" />
+  </form>
+  </div><!-- .formblock -->
