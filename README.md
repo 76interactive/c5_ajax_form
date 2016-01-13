@@ -1,33 +1,26 @@
-# Concrete5 Ajax Form
-Improves the built-in form block so it submits via ajax. Also uses a table-less layout for easier styling, and optional "placeholder" label functionality.
+Concrete5 Ajax Form - Updated for Concrete5.7
+=============================================
 
-*REQUIRES CONCRETE 5.6 OR HIGHER!*
+Improves the built-in form block so it submits via ajax. Also uses a table-less layout for easier styling.
+This repostiroy is a fork of [https://github.com/jordanlev/c5_ajax_form](https://github.com/jordanlev/c5_ajax_form)
 
-## Installation
+### Installation
+* Download repository as .zip
+* Add the `form` directory in your package `/packages/nameofyourpackage/blocks`.
+* If you want to use this block within your package add the following code:
 
- 1. [Download the ZIP file](https://github.com/jordanlev/c5_ajax_form/archive/master.zip)
- 2. Unzip the downloaded file
- 3. Open the `blocks` folder 
- 4. Move the `form` folder to your site's top-level `blocks` directory (*not* `concrete/blocks`)
+```
+    $environment = \Environment::get();
+    $environment->overrideCoreByPackage('blocks/form/controller.php', $this);
 
-That's it! Now any form blocks added to your site will automatically have ajax functionality (unless a custom template is chosen, or unless there are file upload fields in the form).
+    Route::register('/tools/blocks/form/responder', function() {
+      include('packages/nameofyourpackage/blocks/form/tools/responder.php');
+    });
+```
 
-### Placeholder Labels
-To enable "placeholder" functionality (so field labels appear inside the fields themselves), set the `$enablePlaceholders` variable to `true` near the top of `blocks/form/controller.php`.
+### Use view.php as a custom template
+* Optionally move `view.php` from `blocks/form/view.php` to `blocks/form/templates/nameofyourtemplate/view.php` to prevent from overriding the default template.
 
-### Spam Honeypot
-A basic "honeypot" method (e.g. http://stackoverflow.com/q/3622433/477513) is enabled by default to prevent spam submissions. You can disable this by setting the `$enableSpamHoneypot` variable to `false` near the top of `blocks/form/controller.php`.
+### Use without a package
 
-### Google Analytics Event Tracking
-If you're tracking site events with Google Analytics, you'll want to add some code like the following to `blocks/form/view.php`, directly under the `} else if (response.success) {` line:
-	
-	if ('undefined' !== typeof _gaq) {
-		_gaq.push(['_trackEvent', 'Forms', 'Submitted', '<?php echo addslashes($formName); ?>']);
-	}
-
-### PHP Errors/Warnings?
-Some users have reported getting the following error on pages that have a form block:
-`Warning: Invalid argument supplied for foreach() in /PATH/TO/YOUR/SITE/blocks/form/view.php on line 111`.
-This error is caused by the "Overrides Cache" (it gets confused if there was already a form block on the page and then you add this ajax form template to your site).
-To resolve the problem, temporarily disable the Overrides Cache (via Dashbard > System & Settings > Cache & Speed Settings), then visit / reload any pages on your site that have a form block on them, then re-enabled the overrides cache.
-_Or better yet, if the site is in development, you should just leave all caching disabled until you're ready to go live._
+Although I haven't tried nor documented, this block should be easy to implement without a package, directly in your `/application` directory.
