@@ -7,7 +7,7 @@ This repository is a fork of [https://github.com/jordanlev/c5_ajax_form](https:/
 ### Installation
 * Download repository as .zip
 * Add the `form` directory in your package `/packages/nameofyourpackage/blocks`.
-* If you want to use this block within your package add the following code:
+* If you want to use this block within your package add the following code in the on_start method of your package controller:
 
 ```
     $environment = \Environment::get();
