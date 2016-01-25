@@ -1,4 +1,4 @@
-Concrete5 Ajax Form - Updated for Concrete5.7
+Ajax Form for Concrete 5.7
 =============================================
 
 Improves the built-in form block so it submits via ajax. Also uses a table-less layout for easier styling.<br>
