@@ -18,7 +18,7 @@ This repository is a fork of [https://github.com/jordanlev/c5_ajax_form](https:/
     });
 ```
 
-* Replace the package name of the controller namespace: `namespace Concrete\Package\nameofyourpackage\Block\Form`. (in: `/packages/nameofyourpackage/blocks/form/controller.php`)
+* Replace the package name of the controller namespace in: `/packages/nameofyourpackage/blocks/form/controller.php`
 `
 
 ### Use view.php as a custom template
