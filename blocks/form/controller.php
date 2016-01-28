@@ -7,6 +7,8 @@ use Route;
 use \Concrete\Block\Form\MiniSurvey;
 
 class Controller extends \Concrete\Block\Form\Controller {
+
+  public $enableSpamHoneypot = true;
     
   public function view() {
     $miniSurvey = new MiniSurvey();
@@ -78,7 +80,29 @@ class Controller extends \Concrete\Block\Form\Controller {
     $this->set('errorHeader', $errorHeader);
     $this->set('errors', $errors);
     $this->set('questions', $questions);
+    $this->set('enableSpamHoneypot', $this->enableSpamHoneypot);
     $this->set('formName', $surveyBlockInfo['surveyName']); //for GA event tracking
+  }
+
+  public function action_submit_form() {
+    if ($this->enableSpamHoneypot) {
+      if (!empty($_POST['message1'])) {
+        // It's possible that an auto-fill helper or someone using a screenreader filled out this field,
+        // so let them know that it should be left blank.
+        $this->set('formResponse', t('Please correct the following errors:'));
+        $this->set('errors', array(t('Error: It looks like you might be a spammer because you filled out the "Leave Blank" field. If you\'re not a spammer, please leave that field blank and try submitting again. Thanks!')));
+        return;
+      } else if (empty($_POST['message2']) || $_POST['message2'] != '1') {
+        // It's fairly impossible that this form field got altered by accident (because it's an <input type="hidden">),
+        // so don't even bother saying that there's a problem.
+        $errorResponse = '<span class="confirmation">Thank you.</span>';
+        $this->set('formResponse', t('Thank you.'));
+        $this->set('errors', array());
+        return;
+      }
+    }
+    
+    parent::action_submit_form();
   }
   
 }

@@ -113,6 +113,14 @@
             }
           }
         ?>
+
+        <?php if ($enableSpamHoneypot) { ?>
+          <div class="field field-text visuallyhidden">
+            <label for="message"><?php echo t('Leave this field blank'); ?></label>
+            <input type="text" name="message1" />
+          </div>
+          <input type="hidden" name="message2" value="1" />
+        <?php } ?>
       </div><!-- .fields -->
 
       <input type="submit" name="Submit" class="submit" value="Submit" />
