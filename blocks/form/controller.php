@@ -18,9 +18,11 @@ class Controller extends \Concrete\Block\Form\Controller {
     $hasFileUpload = false;
     $questionsRS = $miniSurvey->loadQuestions($qsID, $bID);
     $questions = array();
+
     while ($questionRow = $questionsRS->fetchRow()) {
       $question = $questionRow;
       $question['input'] = $miniSurvey->loadInputType($questionRow, false);
+
       if ($questionRow['inputType'] == 'fileupload') {
         $hasFileUpload = true;
       }
@@ -56,16 +58,15 @@ class Controller extends \Concrete\Block\Form\Controller {
       
       $questions[] = $question;
     }
+
     //Prep thank-you message
     $success = ($_GET['surveySuccess'] && $_GET['qsid'] == intval($qsID));
     $thanksMsg = $this->thankyouMsg;
+
     //Prep error message(s)
     $errorHeader = $this->get('formResponse');
     $errors = $this->get('errors');
     $errors = is_array($errors) ? $errors : array();
-    if ($invalidIP) {
-      $errors[] = $invalidIP;
-    }
         
     //Send data to the view
     $this->set('formDomId', $formDomId);
