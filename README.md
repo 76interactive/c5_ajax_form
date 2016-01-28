@@ -19,7 +19,6 @@ This repository is a fork of [https://github.com/jordanlev/c5_ajax_form](https:/
 ```
 
 * Replace the package name of the controller namespace in: `/packages/nameofyourpackage/blocks/form/controller.php`
-`
 
 ### Use view.php as a custom template
 * Optionally move `view.php` from `blocks/form/view.php` to `blocks/form/templates/nameofyourtemplate/view.php` to prevent from overriding the default template.
