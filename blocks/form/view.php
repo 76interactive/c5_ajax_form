@@ -54,32 +54,32 @@
     });
 
     function <?php echo $templateOnSubmitFunctionName; ?>(form) {
-      $(form).find('.errors').hide().html('');
       $(form).find('input[type=submit]').hide();
-      $(form).find('.indicator').show();
+      $(form).find('.form__errors').hide().html('');
+      $(form).find('.form__indicator').show();
     }
 
     function <?php echo $templateOnSuccessFunctionName; ?>(form, thanks) {
-      $(form).find('.success').html(thanks).show();
-      $(form).find('.indicator').hide();
-      $(form).find('.fields').hide();
+      $(form).find('.form__success').html(thanks).show();
+      $(form).find('.form__indicator').hide();
+      $(form).find('.form__fields').hide();
     }
 
     function <?php echo $templateOnErrorFunctionName; ?>(form, message) {
-      $(form).find('.indicator').hide();
       $(form).find('input[type=submit]').show();
-      $(form).find('.errors').html(message).show();
+      $(form).find('.form__indicator').hide();
+      $(form).find('.form__errors').html(message).show();
     }
   </script>
 
-  <div id="formblock<?php echo $bID; ?>" class="formblock">
-    <form id="<?php echo $formDomId; ?>" method="post" action="<?php echo $formAction; ?>" <?php echo ($hasFileUpload ? 'enctype="multipart/form-data"' : ''); ?>>
+  <div id="form<?php echo $bID; ?>">
+    <form id="<?php echo $formDomId; ?>" class="form" method="post" action="<?php echo $formAction; ?>" <?php echo ($hasFileUpload ? 'enctype="multipart/form-data"' : ''); ?>>
 
-      <div class="success" <?php echo !$success ? 'style="display: none;"' : ''; ?>>
+      <div class="form__success" <?php echo !$success ? 'style="display: none;"' : ''; ?>>
         <?php echo $thanksMsg; ?>
       </div>
       
-      <div class="errors" <?php echo !$errors ? 'style="display: none;"' : ''; ?>>
+      <div class="form__errors" <?php echo !$errors ? 'style="display: none;"' : ''; ?>>
         <?php echo $errorHeader; ?>
         <ul>
           <?php
@@ -94,28 +94,26 @@
         </ul>
       </div>
 
-      <div class="fields">
+      <div class="form__fields">
         <?php
           if (isset($questions) && count($questions) > 0) {
             foreach ($questions as $question) {
         ?>
-          <div class="field field-<?php echo $question['type']; ?>">
-            <label <?php echo $question['labelFor']; ?> class="<?php echo $question['labelClasses']; ?>">
-              <?php echo $question['question']; ?>
-              <?php if ($question['required']): ?>
-                <span class="required">*</span>
-              <?php endif; ?>
-            </label>
+          <label <?php echo $question['labelFor']; ?> class="<?php echo $question['labelClasses']; ?> form__label">
+            <?php echo $question['question']; ?>
+            <?php if ($question['required']): ?>
+              <span class="required">*</span>
+            <?php endif; ?>
+          </label>
 
-            <?php echo $question['input']; ?>
-          </div>
+          <?php echo $question['input']; ?>
         <?php
             }
           }
         ?>
 
         <?php if ($enableSpamHoneypot) { ?>
-          <div class="field field-text visuallyhidden">
+          <div style="display:none">
             <label for="message"><?php echo t('Leave this field blank'); ?></label>
             <input type="text" name="message1" />
           </div>
@@ -123,9 +121,9 @@
         <?php } ?>
       </div><!-- .fields -->
 
-      <input type="submit" name="Submit" class="submit" value="Submit" />
+      <input type="submit" name="Submit" class="form__submit" value="Submit" />
 
-      <div class="indicator" style="display: none;">
+      <div class="form__indicator" style="display: none;">
         <img src="<?php echo ASSETS_URL_IMAGES; ?>/throbber_white_16.gif" width="16" height="16" alt="" />
         <span>Processing...</span>
       </div>
