@@ -1,5 +1,5 @@
 <?php
-namespace Concrete\Package\Zuyderleven\Block\Form;
+namespace Concrete\Package\nameofyourpackage\Block\Form;
 
 use Loader;
 use Route;
