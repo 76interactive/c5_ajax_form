@@ -1,4 +1,6 @@
 <?php
+  use Concrete\Package\nameofyourpackage\Block\Form\Controller as FormController;
+
   defined('C5_EXECUTE') or die(_("Access Denied."));
 
   function sendFormAction() {
@@ -6,7 +8,7 @@
       return error(t('Invalid form submission (missing bID)'));
     } else {
       $block = Block::getByID($_POST['bID']);
-      $blockController = new \Concrete\Block\Form\Controller($block);
+      $blockController = new FormController($block);
       $blockController->noSubmitFormRedirect = true;
       
       $redirectURL = '';

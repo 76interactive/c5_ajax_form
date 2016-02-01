@@ -1,4 +1,7 @@
-<?php defined('C5_EXECUTE') or die("Access Denied.");
+<?php
+  defined('C5_EXECUTE') or die("Access Denied.");
+
+  $nh = Loader::helper('navigation');
 
   $formAction = $this->action('submit_form') . '#' . $qsID;
   $ajaxURL = REL_DIR_FILES_TOOLS_BLOCKS . '/form/responder';
@@ -7,7 +10,8 @@
   $templateOnSubmitFunctionName = "form_{$bID}_onsubmit";
   $templateOnSuccessFunctionName = "form_{$bID}_onsuccess";
   $templateOnErrorFunctionName = "form_{$bID}_onerror";
-  
+
+  $currentPage = Page::getCurrentPage();
 ?>
 
   <script type="text/javascript">
@@ -19,7 +23,8 @@
 
         var formFields = $('#<?php echo $formDomId; ?>').serializeArray();
         var formData = {
-          'bID': <?php echo $bID; ?>
+          'bID': <?php echo $bID; ?>,
+          'pageURL': '<?php echo $nh->getLinkToCollection($currentPage, true) ?>'
         };
 
         formFields.forEach(function(pair, index) {
@@ -42,7 +47,6 @@
             <?php echo $formIsProcessingVariableName; ?> = false;
 
             if (response.success) {
-              $('#<?php echo $formDomId; ?>').clearForm();
               <?php echo $templateOnSuccessFunctionName; ?>('#<?php echo $formDomId; ?>', response.message);
             } else {
               <?php echo $templateOnErrorFunctionName; ?>('#<?php echo $formDomId; ?>', response.message);
