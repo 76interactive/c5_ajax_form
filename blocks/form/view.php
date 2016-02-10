@@ -125,7 +125,7 @@
         <?php } ?>
       </div><!-- .fields -->
 
-      <input type="submit" name="Submit" class="form__submit" value="Submit" />
+      <input type="submit" name="Submit" class="form__submit" value="<?php echo h(t($survey->submitText)); ?>" />
 
       <div class="form__indicator" style="display: none;">
         <img src="<?php echo ASSETS_URL_IMAGES; ?>/throbber_white_16.gif" width="16" height="16" alt="" />
