@@ -12,6 +12,7 @@
   $templateOnErrorFunctionName = "form_{$bID}_onerror";
 
   $currentPage = Page::getCurrentPage();
+  $survey = $controller;
 ?>
 
   <script type="text/javascript">
